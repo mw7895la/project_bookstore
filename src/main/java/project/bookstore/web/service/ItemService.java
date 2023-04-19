@@ -11,9 +11,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.thymeleaf.templateresolver.FileTemplateResolver;
 import project.bookstore.domain.item.Item;
 import project.bookstore.domain.item.ItemSaveForm;
+import project.bookstore.domain.item.ItemSearchCond;
+import project.bookstore.domain.item.ItemUpdateForm;
 import project.bookstore.repository.ItemRepository;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -47,5 +50,12 @@ public class ItemService {
         return findItem;
     }
 
+    public void update(Long id, ItemUpdateForm form) {
+        itemRepository.updateItem(id, form);
+    }
 
+    public List<Item> findAll(ItemSearchCond cond) {
+        List<Item> items = itemRepository.findAll(cond);
+        return items;
+    }
 }

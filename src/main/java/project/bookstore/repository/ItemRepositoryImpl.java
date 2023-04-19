@@ -1,5 +1,6 @@
 package project.bookstore.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,8 +8,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import project.bookstore.domain.item.Item;
 import project.bookstore.domain.item.ItemSaveForm;
+import project.bookstore.domain.item.ItemSearchCond;
 import project.bookstore.domain.item.ItemUpdateForm;
 import project.bookstore.domain.member.Member;
 
@@ -16,9 +19,11 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Repository
 public class ItemRepositoryImpl implements ItemRepository {
 
@@ -54,7 +59,10 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public void updateItem(Long id, ItemUpdateForm itemUpdateForm) {
+    public void updateItem(Long id, ItemUpdateForm form) {
+        String sql = "update item set itemName=?, price=?, quantity=?, image=?, attach=? where id=?";
+        template.update(sql, form.getItemName(), form.getPrice(), form.getQuantity(), form.getImage(), form.getAttach(), id);
+
 
     }
 
@@ -63,7 +71,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         String sql = "select * from item where id=?";
 
         try {
-            Item item = template.queryForObject(sql, memberRowMapper(), id);
+            Item item = template.queryForObject(sql, itemRowMapper(), id);
             return Optional.of(item);
         }catch(EmptyResultDataAccessException e){
             return Optional.empty();
@@ -72,7 +80,7 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     }
 
-    private RowMapper<Item> memberRowMapper() {
+    private RowMapper<Item> itemRowMapper() {
         return (rs,rowNum)->{
             Item item = new Item();
             item.setId(rs.getLong("id"));
@@ -90,8 +98,35 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public List<Item> findAll() {
-        return null;
+    public List<Item> findAll(ItemSearchCond cond) {
+        String itemName = cond.getItemName();
+        Integer maxPrice = cond.getMaxPrice();
+
+        String sql = "select id,item_name,member_id,price,quantity,image,attach,register from item";
+
+        if (StringUtils.hasText(itemName) || maxPrice != null) {
+            sql += " where";
+        }
+        boolean andFlag = false;
+
+        List<Object> param = new ArrayList<>();
+
+        if (StringUtils.hasText(itemName)) {
+            sql += " item_name like concat('%',?,'%')";
+            param.add(itemName);
+            andFlag= true;
+        }
+
+        if(maxPrice !=null){
+            if (andFlag) {
+                sql += " and";
+            }
+            sql += " price <= ?";
+            param.add(maxPrice);
+        }
+        log.info("sql ={}", sql);
+
+        return template.query(sql, param.toArray(), itemRowMapper());
     }
 
 }

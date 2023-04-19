@@ -2,7 +2,10 @@ package project.bookstore.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.stereotype.Repository;
 import project.bookstore.domain.member.Member;
 import project.bookstore.domain.member.UpdateMember;
@@ -19,14 +22,16 @@ import java.util.Optional;
 public class MemberRepositoryImpl implements MemberRepository {
 
     private final DataSource dataSource;
+    private final SQLExceptionTranslator exTranslator;
 
     @Autowired
     public MemberRepositoryImpl(DataSource dataSource) {
         this.dataSource = dataSource;
+        this.exTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
     }
 
     @Override
-    public void join(Member member) throws SQLException {
+    public void join(Member member)  {
         String sql = "insert into Member(user_id,password,nickName) values(?,?,?)";
         Connection con = null;
         PreparedStatement pstmt =null;
@@ -40,7 +45,7 @@ public class MemberRepositoryImpl implements MemberRepository {
             pstmt.executeUpdate();
         }catch(SQLException e){
             log.info("error ={}", e);
-            throw e;
+            throw exTranslator.translate("save", sql, e);
         }finally{
             close(con, pstmt, null);
         }
@@ -48,7 +53,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Member findByIdWithKey(Long id) throws SQLException {
+    public Member findByIdWithKey(Long id)  {
         String sql = "select * from Member where id=?";
 
         Connection con = null;
@@ -71,14 +76,16 @@ public class MemberRepositoryImpl implements MemberRepository {
                 throw new NoSuchElementException("not found user_id with primary key");
             }
         }catch(SQLException e){
-            throw e;
+
+            DataAccessException ex = exTranslator.translate("select", sql, e);
+            throw ex;
         }finally{
             close(con, pstmt, rs);
         }
     }
 
     @Override
-    public Member findById(String userId) throws SQLException {
+    public Member findById(String userId){
         String sql = "select * from Member where user_id=?";
 
         Connection con =null;
@@ -105,14 +112,15 @@ public class MemberRepositoryImpl implements MemberRepository {
 
         }catch(SQLException e){
             log.error("error ={}",e);
-            throw e;
+            DataAccessException ex = exTranslator.translate("select", sql, e);
+            throw ex;
         }finally{
             close(con, pstmt, rs);
         }
     }
 
     @Override
-    public List<Member> findAll() throws SQLException {
+    public List<Member> findAll()  {
         String sql = "select * from Member";
         ArrayList<Member> list = new ArrayList<>();
         Connection con = null;
@@ -134,7 +142,8 @@ public class MemberRepositoryImpl implements MemberRepository {
             return list;
         }catch(SQLException e){
             log.error("error ={}", e);
-            throw e;
+            DataAccessException ex = exTranslator.translate("select", sql, e);
+            throw ex;
         }finally{
             close(con, pstmt, rs);
         }

@@ -2,6 +2,7 @@ package project.bookstore.repository;
 
 import project.bookstore.domain.item.Item;
 import project.bookstore.domain.item.ItemSaveForm;
+import project.bookstore.domain.item.ItemSearchCond;
 import project.bookstore.domain.item.ItemUpdateForm;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface ItemRepository {
 
     Optional<Item> findById(Long id);
 
-    List<Item> findAll();
+    List<Item> findAll(ItemSearchCond cond);
 }

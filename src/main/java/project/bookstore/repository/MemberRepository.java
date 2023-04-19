@@ -10,19 +10,19 @@ import java.util.Optional;
 public interface MemberRepository {
 
     //가입
-    void join(Member member) throws SQLException;
+    void join(Member member);
 
     //조회
-    Member findById(String userId) throws SQLException;
+    Member findById(String userId);
 
     // pk로 조회
-    Member findByIdWithKey(Long id) throws SQLException;
+    Member findByIdWithKey(Long id);
 
     //수정
     void update(UpdateMember member);
 
     //전체 조회
-    List<Member> findAll() throws SQLException;
+    List<Member> findAll() ;
 
     //삭제
     void delete(Member member);

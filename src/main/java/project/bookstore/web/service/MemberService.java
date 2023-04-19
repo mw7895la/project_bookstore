@@ -2,6 +2,7 @@ package project.bookstore.web.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import project.bookstore.domain.member.Member;
 import project.bookstore.repository.MemberRepository;
@@ -19,7 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public void join(Member member) throws SQLException {
+    public void join(Member member)  {
 
         memberRepository.join(member);
     }
@@ -27,9 +28,15 @@ public class MemberService {
     public Member findById(String userId){
         try {
             return memberRepository.findById(userId);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            log.info("DataAccessException ", e);
+            throw e;
         }
+    }
+
+    public Member findByIdWithKey(Long id)  {
+        Member findMember = memberRepository.findByIdWithKey(id);
+        return findMember;
     }
 
 

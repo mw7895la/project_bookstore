@@ -68,15 +68,14 @@
                 <td><a href="item.html" style="text-align: center" th:href="@{|/items/${item.id}|}" th:text="${item.itemName}">상품명</a></td>
                 <td style="height: 100px; text-align: center" th:text="${{item.price}}">10000</td>
                 <td style="text-align: center" th:text="${{item.quantity}}">10</td>
-                <td style="text-align: center" th:text="${item.userId}">사용자 ID</td>
-                <td style="text-align: center" th:text="${{item.likeCount}}">10</td>
+                <td style="text-align: center" th:text="${item.member.user_id}">사용자 ID</td>
+                <td style="text-align: center" th:text="${item.register}">10</td>
                 <!--<td th:text="${item.image}">이미지</td>-->
 
-                    <!--첨부파일: <a th:if="${item.attachFile}" th:href="|/attach/${item.id}|" th:text="${item.getAttachFile().getUploadFileName()}" /><br/>-->
-                <!--<img th:each="imageFile : ${item.imageFiles}" th:src="|/items/images/${imageFile.getStoreFileName()}|" width="150" height="150"/></td>-->
-                <td>
+
+                <!--<td>
                     <img th:if="${item.image}" th:src="|/items/images/${item.image}|" width="150" height="150"/>
-                </td>
+                </td>-->
             </tr>
 
             </tbody>
