@@ -58,4 +58,9 @@ public class ItemService {
         List<Item> items = itemRepository.findAll(cond);
         return items;
     }
+
+    public void delete(Long id) {
+        itemRepository.delete(id);
+
+    }
 }

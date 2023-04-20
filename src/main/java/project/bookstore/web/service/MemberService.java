@@ -8,6 +8,7 @@ import project.bookstore.domain.member.Member;
 import project.bookstore.repository.MemberRepository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -40,4 +41,14 @@ public class MemberService {
     }
 
 
+    public boolean findAll(String userId) {
+        List<Member> members = memberRepository.findAll();
+
+        for (Member member : members) {
+            if (member.getUser_id().equals(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

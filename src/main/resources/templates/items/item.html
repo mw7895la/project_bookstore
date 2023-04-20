@@ -56,13 +56,19 @@
 
     <div class="row">
         <div class="col">
-            <button class="w-100 btn btn-primary btn-lg"
+            <button class="w-100 btn btn-danger"
+                    onclick="location.href='editForm.html'"
+                    th:onclick="|location.href='@{/items/delete/{user_id}/{item_id}(user_id=${item.member.user_id},item_id=${item.id})}'|"
+                    type="button">상품 삭제</button>
+        </div>
+        <div class="col">
+            <button class="w-100 btn btn-primary"
                     onclick="location.href='editForm.html'"
                     th:onclick="|location.href='@{/items/{itemId}/edit(itemId=${item.id})}'|"
                     type="button">상품 수정</button>
         </div>
         <div class="col">
-            <button class="w-100 btn btn-secondary btn-lg"
+            <button class="w-100 btn btn-secondary"
                     onclick="location.href='items.html'"
                     th:onclick="|location.href='@{/items}'|"
                     type="button">목록으로</button>

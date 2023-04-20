@@ -38,7 +38,9 @@ public class MemberController {
      * 순서대로 리팩토링 해볼 것.  bindingResult -> rejectValue-> @Validated 어노테이션
      */
     @PostMapping("/add")
-    public String joinMember(/*@Validated*/ Member member, BindingResult bindingResult) throws SQLException {
+    public String joinMember(/*@Validated*/ Member member, BindingResult bindingResult) {
+
+
         //user_id
         if (!StringUtils.hasText(member.getUser_id())) {
             bindingResult.addError(new FieldError("member", "user_id", "아이디는 필수로 입력해주세요."));
@@ -58,6 +60,13 @@ public class MemberController {
             log.info("bindingResult = {} ", bindingResult);
             return "members/addMemberForm";
         }
+        boolean check = memberService.findAll(member.getUser_id());
+
+        if(check){
+            bindingResult.reject("sameId");
+            return "members/addMemberForm";
+        }
+
         memberService.join(member);
         return "redirect:/";
     }

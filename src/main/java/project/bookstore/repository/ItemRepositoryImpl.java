@@ -129,4 +129,10 @@ public class ItemRepositoryImpl implements ItemRepository {
         return template.query(sql, param.toArray(), itemRowMapper());
     }
 
+
+    @Override
+    public void delete(Long id) {
+        String sql = "delete from item where id=?";
+        template.update(sql, id);
+    }
 }

@@ -1,6 +1,8 @@
 package project.bookstore.web.item;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -9,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import project.bookstore.domain.exception.UserException;
 import project.bookstore.domain.item.Item;
 import project.bookstore.domain.item.ItemSaveForm;
 import project.bookstore.domain.item.ItemSearchCond;
@@ -19,6 +22,7 @@ import project.bookstore.web.service.ItemService;
 import project.bookstore.web.service.MemberService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.List;
@@ -105,6 +109,7 @@ public class ItemController {
         if (!findItem.getMember().getUser_id().equals(member.getUser_id())) {
             /** 예외 추가해야 함. */
             log.info("상품을 등록한 유저와 다른 유저입니다.");
+            throw new UserException("상품을 등록한 유저와 다른 유저입니다.");
         }
         model.addAttribute("item", findItem);
 
@@ -134,6 +139,22 @@ public class ItemController {
 
         return "items/items";
     }
+
+    //delete
+    @DeleteMapping("/delete/{user_id}/{item_id}")
+    public String delete(@PathVariable("user_id") String user_id, @PathVariable("item_id") Long item_id, HttpServletRequest request, HttpServletResponse response) {
+        HttpSession session = request.getSession(false);
+        Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
+
+        if (!member.getUser_id().equals(user_id)) {
+            throw new UserException("잘못된 사용자");
+        }
+
+        itemService.delete(item_id);
+        return "redirect:/items";
+    }
+
+
 
 }
 
