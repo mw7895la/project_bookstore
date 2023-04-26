@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import project.bookstore.domain.exception.UserException;
 
 
-@Component
+//@Component
 public class WebServerCustomizer implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     @Override
     public void customize(ConfigurableWebServerFactory factory) {

@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div class="container" style="max-width: 600px">
+<div class="container" style="max-width: 1000px">
     <div class="py-5 text-center">
         <h2>상품 목록</h2>
     </div>
@@ -57,7 +57,7 @@
                 <th>가격</th>
                 <th>수량</th>
                 <th>User</th>
-                <th>Like</th>
+                <th>등록일</th>
                 <th>이미지</th>
             </tr>
             </thead>
@@ -71,14 +71,11 @@
                 <td style="text-align: center" th:text="${item.member.user_id}">사용자 ID</td>
                 <td style="text-align: center" th:text="${item.register}">10</td>
                 <!--<td th:text="${item.image}">이미지</td>-->
-
-
-                <!--<td>
-                    <img th:if="${item.image}" th:src="|/items/images/${item.image}|" width="150" height="150"/>
-                </td>-->
+                <td>
+                    <img th:each="imageFile : ${item.imageFiles}" th:src="|/items/images/${imageFile.getStoreFileName()}|" width="150" height="150"/>
+                </td>
             </tr>
 
-            </tbody>
         </table>
 
     </div>

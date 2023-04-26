@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <link th:href="@{/css/bootstrap.min.css}"
@@ -47,9 +47,9 @@
     </div>
 
 
-    <!--<div>
-            첨부파일 :<a th:if="${item.getUp_image()}" th:href="|/items/attach/${item.id}|" th:text="${item.getUp_image()}"></a>
-    </div>-->
+    <div>
+            첨부파일 :<a th:if="${item.attachFile}" th:href="|/items/attach/${item.id}|" th:text="${item.getAttachFile().getUploadFileName()}"></a>
+    </div>
 
 
     <hr class="my-4">

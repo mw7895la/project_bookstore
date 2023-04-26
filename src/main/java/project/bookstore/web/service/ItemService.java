@@ -6,6 +6,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
@@ -18,6 +19,7 @@ import project.bookstore.repository.ItemRepository;
 import javax.sql.DataSource;
 import java.util.List;
 
+@Transactional
 @Service
 @Slf4j
 public class ItemService {

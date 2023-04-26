@@ -9,10 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
-import project.bookstore.domain.item.Item;
-import project.bookstore.domain.item.ItemSaveForm;
-import project.bookstore.domain.item.ItemSearchCond;
-import project.bookstore.domain.item.ItemUpdateForm;
+import project.bookstore.domain.item.*;
 import project.bookstore.domain.member.Member;
 
 import javax.sql.DataSource;
@@ -29,15 +26,17 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     private final MemberRepository memberRepository;
     private final JdbcTemplate template;
+    private final ImageRepository imageRepository;
 
-    public ItemRepositoryImpl(DataSource dataSource, MemberRepository memberRepository) {
+    public ItemRepositoryImpl(DataSource dataSource, MemberRepository memberRepository,ImageRepository imageRepository) {
         this.template = new JdbcTemplate(dataSource);
         this.memberRepository = memberRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Override
     public Item addItem(Item item) {
-        String sql = "insert into item(item_name,member_id,price,quantity,image,attach,register) values(?,?,?,?,?,?,?)";
+        String sql = "insert into item(item_name,member_id,register,price,quantity,upload_name,store_name) values(?,?,?,?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -45,11 +44,12 @@ public class ItemRepositoryImpl implements ItemRepository {
             PreparedStatement pstmt = connection.prepareStatement(sql, new String[]{"id"});
             pstmt.setString(1,item.getItemName());
             pstmt.setLong(2, item.getMember().getId());
-            pstmt.setInt(3, item.getPrice());
-            pstmt.setInt(4, item.getQuantity());
-            pstmt.setString(5, item.getImage());
-            pstmt.setString(6, item.getAttach());
-            pstmt.setString(7, String.valueOf(item.getRegister()));
+            pstmt.setString(3, String.valueOf(item.getRegister()));
+            pstmt.setInt(4, item.getPrice());
+            pstmt.setInt(5, item.getQuantity());
+            pstmt.setString(6, item.getAttachFile().getUploadFileName());
+            pstmt.setString(7, item.getAttachFile().getStoreFileName());
+
             return pstmt;
         },keyHolder);
 
@@ -60,8 +60,8 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public void updateItem(Long id, ItemUpdateForm form) {
-        String sql = "update item set itemName=?, price=?, quantity=?, image=?, attach=? where id=?";
-        template.update(sql, form.getItemName(), form.getPrice(), form.getQuantity(), form.getImage(), form.getAttach(), id);
+        String sql = "update item set itemName=?, price=?, quantity=? where id=?";
+        template.update(sql, form.getItemName(), form.getPrice(), form.getQuantity(), id);
 
 
     }
@@ -76,22 +76,38 @@ public class ItemRepositoryImpl implements ItemRepository {
         }catch(EmptyResultDataAccessException e){
             return Optional.empty();
         }
-
-
     }
 
     private RowMapper<Item> itemRowMapper() {
         return (rs,rowNum)->{
             Item item = new Item();
             item.setId(rs.getLong("id"));
+            UploadFile uploadFile = new UploadFile(rs.getString("upload_name"),rs.getString("store_name"));
+            item.setAttachFile(uploadFile);
             item.setItemName(rs.getString("item_name"));
             long memberId = rs.getLong("member_id");
             Member findMember = memberRepository.findByIdWithKey(memberId);
             item.setMember(findMember);
             item.setPrice(rs.getInt("price"));
             item.setQuantity(rs.getInt("quantity"));
-            item.setImage(rs.getString("image"));
-            item.setAttach(rs.getString("attach"));
+            item.setRegister(rs.getString("register"));
+            return item;
+        };
+    }
+
+
+    private RowMapper<Item> itemListRowMapper() {
+        return (rs,rowNum)->{
+            Item item = new Item();
+            item.setId(rs.getLong("id"));
+            List<UploadFile> uploadFiles = imageRepository.findAll(item.getId());
+            item.setImageFiles(uploadFiles);
+            item.setItemName(rs.getString("item_name"));
+            long memberId = rs.getLong("member_id");
+            Member findMember = memberRepository.findByIdWithKey(memberId);
+            item.setMember(findMember);
+            item.setPrice(rs.getInt("price"));
+            item.setQuantity(rs.getInt("quantity"));
             item.setRegister(rs.getString("register"));
             return item;
         };
@@ -102,7 +118,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         String itemName = cond.getItemName();
         Integer maxPrice = cond.getMaxPrice();
 
-        String sql = "select id,item_name,member_id,price,quantity,image,attach,register from item";
+        String sql = "select id,item_name,member_id,price,quantity,register from item";
 
         if (StringUtils.hasText(itemName) || maxPrice != null) {
             sql += " where";
@@ -126,7 +142,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         }
         log.info("sql ={}", sql);
 
-        return template.query(sql, param.toArray(), itemRowMapper());
+        return template.query(sql, param.toArray(), itemListRowMapper());
     }
 
 

@@ -36,8 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/", "/members/add", "/login", "/logout", "/css/**", "/*.ico","/error-page/**");
     }
 
-    @Override
+    /*@Override
     public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
         resolvers.add(new UserHandlerExceptionResolver());
-    }
+    }*/
 }
