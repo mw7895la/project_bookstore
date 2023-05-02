@@ -6,14 +6,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import project.bookstore.domain.member.Member;
 import project.bookstore.domain.member.UpdateMember;
+import project.bookstore.web.SessionConst;
 import project.bookstore.web.service.MemberService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 
 @Slf4j
@@ -62,7 +66,7 @@ public class MemberController {
         }
         boolean check = memberService.findAll(member.getUser_id());
 
-        if(check){
+        if (check) {
             bindingResult.reject("sameId");
             return "members/addMemberForm";
         }
@@ -74,5 +78,32 @@ public class MemberController {
     @GetMapping("/update")
     public String updateForm(@ModelAttribute("memberUpdateForm") UpdateMember memberUpdateForm) {
         return "members/updateMemberForm";
+    }
+
+    @PostMapping("/update")
+    public String updateMember(@Validated @ModelAttribute("memberUpdateForm")UpdateMember updateMember, BindingResult bindingResult, HttpServletRequest httpServletRequest) {
+        if (bindingResult.hasErrors()) {
+            return "members/updateMemberForm";
+        }
+        HttpSession session = httpServletRequest.getSession(false);
+        Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
+
+        Member findMember = memberService.findById(member.getUser_id());
+
+        if (!findMember.getPassword().equals(updateMember.getOldPassword())) {
+            bindingResult.rejectValue("oldPassword", "password.mismatch", null);
+            return "members/updateMemberForm";
+        }
+
+        if (!updateMember.getNewPassword().equals(updateMember.getNewCheckPassword())) {
+            bindingResult.rejectValue("newPassword", "new.password.mismatch", null);
+            bindingResult.rejectValue("newCheckPassword", "new.password.mismatch", null);
+            return "members/updateMemberForm";
+        }
+
+        memberService.update(updateMember);
+
+        return "redirect:/";
+
     }
 }

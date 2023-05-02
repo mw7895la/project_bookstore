@@ -3,6 +3,7 @@ package project.bookstore.web.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import project.bookstore.domain.exception.JoinException;
 import project.bookstore.domain.exception.UserException;
 
 import java.io.IOException;
@@ -28,5 +29,11 @@ public class ControllerCustomAdvice {
     public String MalformedURLExceptionHandler(MalformedURLException e){
         log.error("Exception ", e);
         return "error-page/500";
+    }
+
+    @ExceptionHandler
+    public String JoinException(JoinException e) {
+        log.error("Exception ", e);
+        return "";
     }
 }

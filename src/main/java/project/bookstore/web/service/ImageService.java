@@ -20,9 +20,11 @@ public class ImageService {
     }
 
     public UploadFile addAttach(UploadFile uploadFile) {
+
         return imageRepository.addAttach(uploadFile);
     }
 
+    @Transactional(readOnly = true)
     public List<UploadFile> findAll(Long item_id) {
         return imageRepository.findAll(item_id);
     }

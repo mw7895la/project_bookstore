@@ -3,10 +3,13 @@ package project.bookstore.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
 import project.bookstore.domain.member.Member;
 import project.bookstore.domain.member.UpdateMember;
 
@@ -23,6 +26,7 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     private final DataSource dataSource;
     private final SQLExceptionTranslator exTranslator;
+
 
     @Autowired
     public MemberRepositoryImpl(DataSource dataSource) {
@@ -151,7 +155,23 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     @Override
     public void update(UpdateMember member) {
+        String sql = "update member set password=? where user_id=?";
 
+        Connection con = null;
+        PreparedStatement pstmt =null;
+
+        try{
+            con = getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, member.getNewPassword());
+            pstmt.setString(2, member.getUser_id());
+            pstmt.executeUpdate();
+        }catch(SQLException e){
+            DataAccessException ex = exTranslator.translate("update", sql, e);
+            throw ex;
+        }finally{
+            close(con, pstmt, null);
+        }
     }
 
 
@@ -175,12 +195,14 @@ public class MemberRepositoryImpl implements MemberRepository {
     private void close(Connection con, Statement stmt, ResultSet resultSet) {
         JdbcUtils.closeResultSet(resultSet);
         JdbcUtils.closeStatement(stmt);
-        JdbcUtils.closeConnection(con);
+        DataSourceUtils.releaseConnection(con, dataSource);
+        //트랜잭션 동기화를 이용하려면 DataSourceUtils.를 사용해야 한다.  관리 안하는 커넥션이면 닫아버린다.
     }
 
 
     private Connection getConnection() throws SQLException {
-        Connection con = dataSource.getConnection();
+        //Connection con = dataSource.getConnection();
+        Connection con = DataSourceUtils.getConnection(dataSource);
         log.info("get connection ={}, class ={}", con, con.getClass());
         return con;
     }

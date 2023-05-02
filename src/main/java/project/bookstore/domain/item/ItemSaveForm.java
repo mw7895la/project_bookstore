@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import project.bookstore.domain.member.Member;
 
 import javax.swing.plaf.multi.MultiListUI;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data

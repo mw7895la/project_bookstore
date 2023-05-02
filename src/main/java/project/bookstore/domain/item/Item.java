@@ -1,8 +1,10 @@
 package project.bookstore.domain.item;
 
 import lombok.Data;
+import lombok.NonNull;
 import project.bookstore.domain.member.Member;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,6 +16,7 @@ public class Item {
     private String register;
     private Integer price;
     private Integer quantity;
+
 
     private UploadFile attachFile;
     private List<UploadFile> imageFiles;

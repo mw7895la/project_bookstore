@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import project.bookstore.domain.exception.UserException;
 import project.bookstore.domain.item.*;
 import project.bookstore.domain.member.Member;
-import project.bookstore.repository.ImageRepository;
+
 import project.bookstore.web.SessionConst;
 import project.bookstore.web.file.FileStore;
 import project.bookstore.web.service.ImageService;
@@ -26,13 +26,13 @@ import project.bookstore.web.service.ItemService;
 import project.bookstore.web.service.MemberService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
 
 @Slf4j
 @Controller
@@ -85,15 +85,18 @@ public class ItemController {
         Member member = (Member) session.getAttribute(SessionConst.LOGIN_MEMBER);
         Member findMember = memberService.findById(member.getUser_id());
 
-        UploadFile uploadFile = fileStore.singleFile(item.getAttachFile());
+
         Item newItem = new Item();
         newItem.setItemName(item.getItemName());
         newItem.setPrice(item.getPrice());
         newItem.setQuantity(item.getQuantity());
         newItem.setMember(findMember);
         newItem.setRegister(String.valueOf(LocalDate.now()));
+
+        UploadFile uploadFile = fileStore.singleFile(item.getAttachFile());
         newItem.setAttachFile(uploadFile);
         Item savedItem = itemService.addItem(newItem);
+
 
         List<UploadFile> uploadFiles = fileStore.manyFiles(item.getImageFiles());
         for (UploadFile file : uploadFiles) {
